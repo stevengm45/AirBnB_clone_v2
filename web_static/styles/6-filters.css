@@ -1,0 +1,70 @@
+.container .filters {
+    background: #ffffff;
+    height: 70px;
+    width: 100%;
+    border: #DDDDDD solid 1px;
+    border-radius: 4px;
+}
+.container .filters .locations, .amenities {
+    height: 100%;
+    width: 25%;
+    border-right: #DDDDDD solid 1px;
+    display: inline-grid;
+}
+.container .filters div h3 {
+    font-weight: 600;
+    margin-bottom: 0px;
+    padding-left: 40px;
+}
+.container .filters div h4 {
+    font-weight: 400;
+    font-size: 14px;
+    margin-top: 1px;
+    padding-left: 40px;
+}
+.container .filters button {
+    font-size: 18px;
+    background-color: #ff5a5f;
+    color: #ffffff;
+    height: 48px;
+    width: 20%;
+    border: none;
+    border-radius: 4px;
+    float: right;
+    margin: 11px 30px 11px 0;
+    opacity: 1;    
+}
+.container .filters button:hover {
+    opacity: 0.9;
+}
+
+.popover {
+    background-color: #FAFAFA;
+    border: #DDDDDD solid 1px;
+    display: none;
+    border-radius: 4px;
+    margin: 0px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.popover h2 {
+    margin-bottom: 0px;
+    font-size: 16px;
+}
+.popover h4 {
+    margin-bottom: 5px;
+    margin-top: 0px;
+}
+li{
+    margin-top: 5%;
+}
+ul{
+    list-style-type: none;
+    padding-left: 5%;
+}
+.locations:hover > .popover {
+    display: block;
+}
+.amenities:hover > .popover {
+    display: block;
+}
