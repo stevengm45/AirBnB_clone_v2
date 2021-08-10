@@ -11,7 +11,7 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-
+import shlex
 
 class HBNBCommand(cmd.Cmd):
     """
@@ -42,6 +42,27 @@ class HBNBCommand(cmd.Cmd):
         """
         raise SystemExit
 
+    def _key_value_parser(self, args):
+        """creates a dictionary from a list of strings"""
+        new_dict = {}
+        for arg in args:
+            if "=" in arg:
+                kvp = arg.split('=', 1)
+                key = kvp[0]
+                value = kvp[1]
+                if value[0] == value[-1] == '"':
+                    value = shlex.split(value)[0].replace('_', ' ')
+                else:
+                    try:
+                        value = int(value)
+                    except:
+                        try:
+                            value = float(value)
+                        except:
+                            continue
+                new_dict[key] = value
+        return new_dict
+
     def do_create(self, line):
         """Creates a new instance of BaseModel, saves it and prints the id
         Usage: create <class name>
@@ -56,10 +77,11 @@ class HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
             return False
         else:
-            new_instance = self.classes[args[0]]()
-            print(new_instance.id)
-            new_instance.save()
-            return False
+            new_dict = self._key_value_parser(args[1:])
+            new_instance = self.classes[args[0]](**new_dict)
+        print(new_instance.id)
+        new_instance.save()
+        return False
 
     def do_show(self, line):
         """Prints the string representation of an instance based on the class and id
