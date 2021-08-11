@@ -3,7 +3,7 @@
     Contains the entry point of the command interpreter
 """
 import cmd
-from models.base_model import BaseModel, Base
+from models.base_model import BaseModel
 from models import storage
 from models.user import User
 from models.state import State
@@ -11,7 +11,7 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-import shlex
+from os import getenv as env
 
 
 class HBNBCommand(cmd.Cmd):
@@ -84,6 +84,25 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
         else:
             new_instance.save()
+
+    """def do_create(self, line):"""
+    """Creates a new instance of BaseModel, saves it and prints the id
+        Usage: create <class name>
+        """
+    """    args = str.split(line)
+
+        if len(args) < 1:
+            print("** class name missing **")
+            return False
+
+        if args[0] not in self.classes:
+            print("** class doesn't exist **")
+            return False
+        else:
+            new_instance = self.classes[args[0]]()
+            print(new_instance.id)
+            new_instance.save()
+            return False"""
 
     def do_show(self, line):
         """Prints the string representation of an instance based on the class and id
