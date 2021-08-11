@@ -14,6 +14,7 @@ Base = declarative_base()
 
 time = "%Y-%m-%dT%H:%M:%S.%f"
 
+
 class BaseModel:
     """
     Class BaseModel that defines all common attributes
@@ -77,7 +78,7 @@ class BaseModel:
         dictionary['updated_at'] = self.updated_at.isoformat()
         dictionary.pop("_sa_instance_state", None)
         return dictionary
-        
+
     def delete(self):
         """delete the current instance from the storage"""
         models.storage.delete(self)
