@@ -30,14 +30,15 @@ class FileStorage:
 
     """------------------------------- METHODS ----------------------------"""
     def all(self, cls=None):
-        """returns the dictionary __objects"""
-        if cls is not None:
-            new_dict = {}
-            for key, value in self.__objects.items():
-                if cls == value.__class__ or cls == value.__class__.__name__:
-                    new_dict[key] = value
-            return new_dict
-        return self.__objects
+        """Returns a dictionary of models currently in storage"""
+        if cls is None:
+            return FileStorage.__objects
+        else:
+            class_dict = {}
+            for key, value in FileStorage.__objects.items():
+                if cls == type(value):
+                    class_dict[key] = value
+            return class_dict
 
     def new(self, obj):
         """
@@ -65,9 +66,6 @@ class FileStorage:
             with open(self.__file_path, 'r', encoding='utf-8') as my_file:
                 objs = json.load(my_file)
 
-            """for key, value in objects.items():
-                if value['__class__'] == 'BaseModel':
-                    FileStorage.__objects[key] = User(**value)"""
             for key in objs:
                 self.__objects[key] = (classes[objs[key]["__class__"]]
                                        (**objs[key]))
