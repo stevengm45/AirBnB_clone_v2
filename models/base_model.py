@@ -3,16 +3,16 @@
     This is the base class of all models
 """
 import models
-from datetime import datetime
-import sqlalchemy
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, String, Integer, MetaData, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+from os import getenv as env
 import uuid
 
 Base = declarative_base()
 
-time = "%Y-%m-%dT%H:%M:%S.%f"
 
+time = "%Y-%m-%dT%H:%M:%S.%f"
 
 class BaseModel:
     """
@@ -24,29 +24,32 @@ class BaseModel:
     updated_at = Column(DateTime, default=datetime.utcnow())
 
     def __init__(self, *args, **kwargs):
-        """
-            __init__ method to initialize the BaseModel
-            isinstance
-        """
-        """Initialization of the base model"""
-        if kwargs:
-            for key, value in kwargs.items():
-                if key != "__class__":
-                    setattr(self, key, value)
-            if kwargs.get("created_at", None) and type(self.created_at) is str:
-                self.created_at = datetime.strptime(kwargs["created_at"], time)
-            else:
-                self.created_at = datetime.utcnow()
-            if kwargs.get("updated_at", None) and type(self.updated_at) is str:
-                self.updated_at = datetime.strptime(kwargs["updated_at"], time)
-            else:
-                self.updated_at = datetime.utcnow()
-            if kwargs.get("id", None) is None:
-                self.id = str(uuid.uuid4())
-        else:
+        """Instatntiates a new model"""
+        if not kwargs:
+            from models import storage
             self.id = str(uuid.uuid4())
-            self.created_at = datetime.utcnow()
-            self.updated_at = self.created_at
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
+            if env("HBNB_TYPE_STORAGE") != "db":
+                storage.new(self)
+        else:
+            # Add the "id" attribute if not in kwargs.
+            if "id" not in kwargs:
+                kwargs["id"] = self.id = str(uuid.uuid4())
+
+            # Add the "updated at" attribute if not in kwargs.
+            if "updated_at" not in kwargs:
+                kwargs["updated_at"] = datetime.now().isoformat()
+            kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
+                                                     '%Y-%m-%dT%H:%M:%S.%f')
+            # Add the "created at" attribute if not in kwargs.
+            if "created_at" not in kwargs:
+                kwargs["created_at"] = datetime.now().isoformat()
+            kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
+                                                     '%Y-%m-%dT%H:%M:%S.%f')
+            if '__class__' in kwargs:
+                del kwargs['__class__']
+            self.__dict__.update(kwargs)
 
     def __str__(self):
         """
@@ -74,7 +77,7 @@ class BaseModel:
         dictionary['updated_at'] = self.updated_at.isoformat()
         dictionary.pop("_sa_instance_state", None)
         return dictionary
-
+        
     def delete(self):
         """delete the current instance from the storage"""
         models.storage.delete(self)
