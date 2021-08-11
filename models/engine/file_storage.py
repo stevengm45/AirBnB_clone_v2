@@ -38,6 +38,7 @@ class FileStorage:
                     new_dict[key] = value
             return new_dict
         return self.__objects
+
     def new(self, obj):
         """
         Method to sets in __objects the obj with key
