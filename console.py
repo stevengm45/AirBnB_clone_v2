@@ -13,6 +13,7 @@ from models.place import Place
 from models.review import Review
 import shlex
 
+
 class HBNBCommand(cmd.Cmd):
     """
     class HBNBCommand that contains entry point of command interpreter
@@ -42,46 +43,47 @@ class HBNBCommand(cmd.Cmd):
         """
         raise SystemExit
 
-    def _key_value_parser(self, args):
-        """creates a dictionary from a list of strings"""
-        new_dict = {}
-        for arg in args:
-            if "=" in arg:
-                kvp = arg.split('=', 1)
-                key = kvp[0]
-                value = kvp[1]
-                if value[0] == value[-1] == '"':
-                    value = shlex.split(value)[0].replace('_', ' ')
-                else:
-                    try:
-                        value = int(value)
-                    except:
-                        try:
-                            value = float(value)
-                        except:
-                            continue
-                new_dict[key] = value
-        return new_dict
-
-    def do_create(self, line):
-        """Creates a new instance of BaseModel, saves it and prints the id
-        Usage: create <class name>
-        """
-        args = str.split(line)
-
-        if len(args) < 1:
+    def do_create(self, args):
+        """ Create an object of any class"""
+        if not args:
             print("** class name missing **")
-            return False
-
-        if args[0] not in self.classes:
-            print("** class doesn't exist **")
-            return False
+            return
         else:
-            new_dict = self._key_value_parser(args[1:])
-            new_instance = self.classes[args[0]](**new_dict)
+            args = args.split(' ')
+            if args[0] not in HBNBCommand.classes:
+                print("** class doesn't exist **")
+                return
+
+        new_instance = HBNBCommand.classes[args[0]]()
+
+        # For setting attributes of the new instance.
+        for attributes in args[1:]:
+            pair = attributes.split('=')
+            # Check if its a string.
+            if pair[1][0] == '"':
+                pair[1] = pair[1][1:-1].replace('"', '\"')
+                pair[1] = pair[1].replace('_', ' ')
+
+            # Check if its an integer.
+            elif pair[1].isdigit():
+                pair[1] = int(pair[1])
+
+            # Check if its a float.
+            else:
+                try:
+                    pair[1] = float(pair[1])
+                except:
+                    continue
+
+            setattr(new_instance, pair[0], pair[1])
+
         print(new_instance.id)
-        new_instance.save()
-        return False
+
+        if env("HBNB_TYPE_STORAGE") == "db":
+            storage.new(new_instance)
+            storage.save()
+        else:
+            new_instance.save()
 
     def do_show(self, line):
         """Prints the string representation of an instance based on the class and id
