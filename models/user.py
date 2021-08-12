@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship, backref
 from os import getenv as env
 
 
-class User(BaseModel):
+class User(BaseModel, Base):
     """class User display the information of user"""
     __tablename__ = "users"
     if env("HBNB_TYPE_STORAGE") == "db":
