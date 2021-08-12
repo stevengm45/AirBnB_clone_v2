@@ -1,62 +1,57 @@
 #!/usr/bin/python3
-"""
-This function is db storage
-"""
-import models
+""" Manages DBstorage Class """
+from sqlalchemy.orm import sessionmaker, scoped_session, Session
+from sqlalchemy import (create_engine)
+from models.base_model import Base
 from models.amenity import Amenity
-from models.base_model import BaseModel, Base
-from models.city import City
-from models.place import Place
 from models.review import Review
 from models.state import State
+from models.place import Place
+from os import getenv as env
 from models.user import User
-from os import getenv
-import sqlalquemy
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-
-classes = {'User': User,
-           'State': State,
-           'City': City,
-           'Amenity': Amenity,
-           'Place': Place,
-           'Review': Review}
+from models.city import City
 
 
-class DBStorage:
+class DBStorage():
+    """ Class for logic of the DataBase """
     __engine = None
     __session = None
 
     def __init__(self):
-        HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
-        HBNB_MYSQL_PWD = getenv('HBNB_MYSQL_PWD')
-        HBNB_MYSQL_HOST = getenv('HBNB_MYSQL_HOST')
-        HBNB_MYSQL_DB = getenv('HBNB_MYSQL_DB')
-        HBNB_ENV = getenv('HBNB_ENV')
-        self.engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.
-                                    fromat(HBNB_MYSQL_USER,
-                                           HBNB_MYSQL_PWD,
-                                           HBNB_MYSQL_HOST,
-                                           HBNB_MYSQL_DB))
-        if HBNB_ENV == "test":
+        """ Definition of the inital method. """
+        user = env("HBNB_MYSQL_USER")
+        passwd = env("HBNB_MYSQL_PWD")
+        host = env("HBNB_MYSQL_HOST")
+        db = env("HBNB_MYSQL_DB")
+        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
+                                      .format(user, passwd, host, db),
+                                      pool_pre_ping=True)
+        if env("HBNB_ENV") == "test":
             Base.metadata.drop_all(self.__engine)
 
-        def all(self, cls=None):
-            new_dict = {}
-            for i in classes:
-                if cls is None or cls is self.clasess[i] or cls is i:
-                    objs = self.__session.query(self.classes[i]), all()
-                    for obj in objs:
-                        key = obj.__class__.__name__ + '.' + obj.id
-                        new_dict[key] = obj
-                    return (new_dict)
+    def all(self, cls=None):
+        """ Returns the dictionary of all current objects. """
+        objDict = {}
+        if cls:
+            query = self.__session.query(cls).all()
+            for obj in query:
+                strKey = "{}.{}".format(type(obj).__name__, obj.id)
+                objDict[strKey] = obj
+
+        else:
+            classList = ["Amenity", "Review", "State", "Place", "User", "City"]
+            for className in classList:
+                obj = self.__session.query(eval(className)).all()
+                strKey = "{}.{}".format(className, obj.id)
+                setattr(objDict, strKey, obj)
+        return (objDict)
 
     def new(self, obj):
-        """add the object to the current database session"""
+        """ Adds a new object to session. """
         self.__session.add(obj)
 
     def save(self):
-        """commit all changes of the current database session"""
+        """ Commits the current session to the DB. """
         self.__session.commit()
 
     def delete(self, obj=None):
