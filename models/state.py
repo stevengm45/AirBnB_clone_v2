@@ -1,7 +1,6 @@
+
 #!/usr/bin/python3
-"""
-  This is class State
-"""
+""" State Module for HBNB project """
 from models.base_model import BaseModel, Base
 from models.engine.file_storage import FileStorage
 from sqlalchemy import Column, String
@@ -9,10 +8,8 @@ from sqlalchemy.orm import relationship, backref
 from os import getenv as env
 
 
-class State(BaseModel):
-    """
-    class State dasplay place where its city
-    """
+class State(BaseModel, Base):
+    """ State class """
     __tablename__ = "states"
     if env("HBNB_TYPE_STORAGE") == "db":
         name = Column(String(128), nullable=False)
