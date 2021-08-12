@@ -14,6 +14,7 @@ from models.review import Review
 from os import getenv as env
 
 
+
 class HBNBCommand(cmd.Cmd):
     """
     class HBNBCommand that contains entry point of command interpreter
@@ -85,8 +86,8 @@ class HBNBCommand(cmd.Cmd):
         else:
             new_instance.save()
 
-    """def do_create(self, line):"""
-    """Creates a new instance of BaseModel, saves it and prints the id
+    #def do_create(self, line):
+        """Creates a new instance of BaseModel, saves it and prints the id
         Usage: create <class name>
         """
     """    args = str.split(line)
