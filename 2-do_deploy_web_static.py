@@ -1,30 +1,59 @@
 #!/usr/bin/python3
-"""
-Fabric script based on the file 1-pack_web_static.py that distributes an
-archive to the web servers
-"""
+""" Generates a .tgz archive from the contents of the web_static """
+from fabric.api import local, put, run, env
+from os import path
+from datetime import datetime
 
-from fabric.api import put, run, env
-from os.path import exists
-env.hosts = ['142.44.167.228', '144.217.246.195']
+env.hosts = ['{}@35.237.172.23'.format(env.user), '{}@34.75.60.230'.format(
+    env.user)]
+
+
+def do_pack():
+    """ Create directory if doesn't exist and backup folder web_static """
+    time = str(datetime.now()).split(".")[0].replace(
+        ":", "").replace(" ", "").replace("-", "")
+    if path.exists("versions"):
+        local("tar -czf versions/web_static_{}.tgz web_static".format(time))
+    else:
+        local("mkdir -p versions")
+        local("tar -czf versions/web_static_{}.tgz web_static".format(time))
 
 
 def do_deploy(archive_path):
-    """distributes an archive to the web servers"""
-    if exists(archive_path) is False:
+    """ Deploy a new file to web_static """
+    if not path.exists(archive_path):
         return False
+
     try:
-        file_n = archive_path.split("/")[-1]
-        no_ext = file_n.split(".")[0]
-        path = "/data/web_static/releases/"
-        put(archive_path, '/tmp/')
-        run('mkdir -p {}{}/'.format(path, no_ext))
-        run('tar -xzf /tmp/{} -C {}{}/'.format(file_n, path, no_ext))
-        run('rm /tmp/{}'.format(file_n))
-        run('mv {0}{1}/web_static/* {0}{1}/'.format(path, no_ext))
-        run('rm -rf {}{}/web_static'.format(path, no_ext))
-        run('rm -rf /data/web_static/current')
-        run('ln -s {}{}/ /data/web_static/current'.format(path, no_ext))
+        # Put the file in /tmp/ directory
+        put(archive_path, "/tmp/")
+
+        # File token and variables to be used
+        tgz = archive_path.split("/")[-1]
+        folder = "/data/web_static/releases/{}/".format(tgz[:-4])
+        tmp_directory = "/tmp/{}".format(tgz)
+        symlink = "/data/web_static/current"
+
+        # Create the folder to uncompress targz
+        run("mkdir -p {}".format(folder))
+
+        # Uncompress the tgz file
+        run("tar -xzf {} -C {}".format(tmp_directory, folder))
+
+        # Delete the tgz files
+        run("rm {}".format(tmp_directory))
+
+        # Move the folder web_static from tgz
+        run("mv {}web_static/* {}".format(folder, folder))
+
+        # rm web_static
+        run("rm -rf {}web_static".format(folder))
+
+        # Delete the symbolic link
+        run("rm -rf {}".format(symlink))
+
+        # Create a new symbolic link
+        run("ln -s {} {}".format(folder, symlink))
         return True
     except:
         return False
