@@ -82,3 +82,7 @@ class FileStorage:
                 self.__objects.pop(objDict)
             except:
                 pass
+
+    def close(self):
+        """ Reload the sesion """
+        self.reload()
